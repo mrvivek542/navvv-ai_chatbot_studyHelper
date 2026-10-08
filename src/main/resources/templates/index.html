@@ -46,9 +46,14 @@
                         <div class="brand-sub">Java-Powered Context-Aware Intelligent Study Assistant</div>
                     </div>
                 </div>
-                <div class="badge">
-                    <span class="pulse-dot"></span>
-                    <span id="sessionStatus">AI Tutor Online</span>
+                <div class="header-actions">
+                    <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                        <span id="themeIcon">☀️</span>
+                    </button>
+                    <div class="badge">
+                        <span class="pulse-dot"></span>
+                        <span id="sessionStatus">AI Tutor Online</span>
+                    </div>
                 </div>
             </header>
 
@@ -115,11 +120,33 @@
 
         let currentConversationId = null;
 
-        // Load conversation list and document state on page load
+        // Load conversation list, document state, and theme on page load
         document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
             loadConversations();
             checkCurrentDoc();
         });
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('studymind-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('studymind-theme', next);
+            updateThemeIcon(next);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.innerText = theme === 'dark' ? '☀️' : '🌙';
+            }
+        }
 
         async function checkCurrentDoc() {
             try {
