@@ -18,10 +18,10 @@
             </div>
 
             <!-- Upload Area -->
-            <input type="file" id="fileInput" accept=".pdf,.txt" style="display: none;" onchange="handleFileUpload(event)">
+            <input type="file" id="fileInput" accept=".pdf,.txt,.xlsx,.xls" style="display: none;" onchange="handleFileUpload(event)">
             <div class="upload-box" onclick="document.getElementById('fileInput').click()">
                 <div class="upload-title"><span>↑</span> Upload Study File</div>
-                <div class="upload-sub">PDF or TXT (Max 5 MB)</div>
+                <div class="upload-sub">PDF, TXT, or Excel (Max 5 MB)</div>
             </div>
 
             <!-- Active Document Badge -->
@@ -65,6 +65,18 @@
                 <button class="tool-btn" onclick="generateStudyAid('flashcards')">
                     <span>⚡</span>
                     <span>5 Flashcards</span>
+                </button>
+                <button class="tool-btn" onclick="promptYouTubeSummary()">
+                    <span>▶️</span>
+                    <span>YouTube to Notes</span>
+                </button>
+                <button class="tool-btn" onclick="exportCurrentChatAsPdf()">
+                    <span>📥</span>
+                    <span>Export PDF</span>
+                </button>
+                <button class="tool-btn" onclick="exportCurrentChatAsExcel()">
+                    <span>📊</span>
+                    <span>Export Excel</span>
                 </button>
             </div>
 
@@ -195,6 +207,106 @@
             } catch (err) {
                 removeTypingBubble();
                 appendMessage('ai', 'Error generating study aid. Please try again.');
+            }
+        }
+
+        async function promptYouTubeSummary() {
+            const url = prompt('Enter a YouTube video URL to generate comprehensive lecture notes & summary:');
+            if (!url || !url.trim()) return;
+
+            appendMessage('user', `▶️ Generate study notes from YouTube: ${url.trim()}`);
+            createTypingBubble();
+
+            try {
+                const res = await fetch('/api/modern/youtube-summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url.trim() })
+                });
+                const data = await res.json();
+                removeTypingBubble();
+
+                if (data.success && data.data) {
+                    appendMessage('ai', data.data);
+                } else {
+                    appendMessage('ai', `⚠️ ${data.error || 'Could not process the YouTube link.'}`);
+                }
+            } catch (err) {
+                removeTypingBubble();
+                appendMessage('ai', 'Error processing YouTube video.');
+            }
+        }
+
+        function getAllChatText() {
+            const bubbles = chatWindow.querySelectorAll('.message-content');
+            let fullText = "";
+            bubbles.forEach(b => {
+                fullText += b.innerText + "\n\n";
+            });
+            return fullText.trim() || "No study notes generated yet.";
+        }
+
+        async function exportCurrentChatAsPdf() {
+            const content = getAllChatText();
+            appendMessage('ai', '⏳ Preparing your formatted study notes PDF download...');
+
+            try {
+                const res = await fetch('/api/modern/export/pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: "StudyMind AI - Academic Revision Notes",
+                        content: content
+                    })
+                });
+
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = "StudyMind_Notes.pdf";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    appendMessage('ai', '✅ Notes PDF downloaded successfully!');
+                } else {
+                    appendMessage('ai', '❌ Failed to generate PDF file.');
+                }
+            } catch (e) {
+                appendMessage('ai', '❌ Error downloading PDF.');
+            }
+        }
+
+        async function exportCurrentChatAsExcel() {
+            const content = getAllChatText();
+            appendMessage('ai', '⏳ Preparing your study revision Excel sheet (.xlsx)...');
+
+            try {
+                const res = await fetch('/api/modern/export/excel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: "Study Revision Sheet",
+                        content: content
+                    })
+                });
+
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = "StudyMind_Sheet.xlsx";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    appendMessage('ai', '✅ Study revision Excel sheet downloaded successfully!');
+                } else {
+                    appendMessage('ai', '❌ Failed to generate Excel workbook.');
+                }
+            } catch (e) {
+                appendMessage('ai', '❌ Error downloading Excel sheet.');
             }
         }
 

@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DocumentIngestionService handles upload validation and text extraction
@@ -64,8 +66,10 @@ public class DocumentIngestionService {
             doc = extractPdfText(file, originalFilename);
         } else if (lowerName.endsWith(".txt")) {
             doc = extractTxtText(file, originalFilename);
+        } else if (lowerName.endsWith(".xlsx") || lowerName.endsWith(".xls")) {
+            doc = extractExcelText(file, originalFilename);
         } else {
-            throw new IllegalArgumentException("Unsupported file type. Only PDF and TXT study files are supported.");
+            throw new IllegalArgumentException("Unsupported file type. Only PDF, TXT, and Excel (XLSX) study files are supported.");
         }
 
         if (doc.getTotalWords() == 0) {
@@ -117,6 +121,45 @@ public class DocumentIngestionService {
 
         // TXT files have 1 single logical page
         doc.addPage(new ExtractedPage(1, content.toString().trim()));
+        return doc;
+    }
+
+    /**
+     * Extracts text and tabular data from Excel spreadsheets using Apache POI
+     */
+    private ExtractedDocument extractExcelText(MultipartFile file, String filename) throws Exception {
+        ExtractedDocument doc = new ExtractedDocument(filename, "xlsx", file.getSize());
+
+        try (org.apache.poi.ss.usermodel.Workbook workbook = org.apache.poi.ss.usermodel.WorkbookFactory.create(file.getInputStream())) {
+            int numberOfSheets = workbook.getNumberOfSheets();
+            org.apache.poi.ss.usermodel.DataFormatter formatter = new org.apache.poi.ss.usermodel.DataFormatter();
+
+            for (int s = 0; s < numberOfSheets; s++) {
+                org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheetAt(s);
+                StringBuilder sheetText = new StringBuilder();
+                sheetText.append("Sheet: ").append(sheet.getSheetName()).append("\n");
+
+                for (org.apache.poi.ss.usermodel.Row row : sheet) {
+                    List<String> rowValues = new ArrayList<>();
+                    for (org.apache.poi.ss.usermodel.Cell cell : row) {
+                        String cellVal = formatter.formatCellValue(cell).trim();
+                        if (!cellVal.isEmpty()) {
+                            rowValues.add(cellVal);
+                        }
+                    }
+                    if (!rowValues.isEmpty()) {
+                        sheetText.append(String.join(" | ", rowValues)).append("\n");
+                    }
+                }
+
+                // Each sheet acts as a distinct page for citations
+                doc.addPage(new ExtractedPage(s + 1, sheetText.toString().trim()));
+            }
+        } catch (Exception e) {
+            logger.error("Error reading Excel file with Apache POI", e);
+            throw new IllegalArgumentException("Could not parse Excel spreadsheet. File may be corrupted or encrypted.");
+        }
+
         return doc;
     }
 }
