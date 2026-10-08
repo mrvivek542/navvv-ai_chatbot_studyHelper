@@ -12,7 +12,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <button class="new-chat-btn" onclick="startNewChat()">
-                    <span>➕</span>
+                    <span>✦</span>
                     <span>New Study Session</span>
                 </button>
             </div>
@@ -20,7 +20,7 @@
             <!-- Upload Area -->
             <input type="file" id="fileInput" accept=".pdf,.txt" style="display: none;" onchange="handleFileUpload(event)">
             <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-                <div class="upload-title">📁 Upload Study File</div>
+                <div class="upload-title"><span>↑</span> Upload Study File</div>
                 <div class="upload-sub">PDF or TXT (Max 5 MB)</div>
             </div>
 
@@ -40,7 +40,7 @@
         <main class="main-stage">
             <header class="app-header">
                 <div class="brand-section">
-                    <div class="logo-badge">🧠</div>
+                    <div class="logo-badge">✦</div>
                     <div>
                         <div class="brand-title" th:text="${appName}">StudyMind AI</div>
                         <div class="brand-sub">Java-Powered Context-Aware Intelligent Study Assistant</div>
@@ -48,7 +48,7 @@
                 </div>
                 <div class="badge">
                     <span class="pulse-dot"></span>
-                    <span id="sessionStatus">Session Active</span>
+                    <span id="sessionStatus">AI Tutor Online</span>
                 </div>
             </header>
 
