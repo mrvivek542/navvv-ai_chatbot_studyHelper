@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${appName}">StudyMind AI</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar: Study Sessions & File Upload -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" onclick="startNewChat()">
+                    <span>➕</span>
+                    <span>New Study Session</span>
+                </button>
+            </div>
+
+            <!-- Upload Area -->
+            <input type="file" id="fileInput" accept=".pdf,.txt" style="display: none;" onchange="handleFileUpload(event)">
+            <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-title">📁 Upload Study File</div>
+                <div class="upload-sub">PDF or TXT (Max 5 MB)</div>
+            </div>
+
+            <!-- Active Document Badge -->
+            <div class="active-doc-badge" id="activeDocBadge">
+                <div class="doc-info" id="activeDocInfo">📄 notes.pdf</div>
+                <button class="clear-doc-btn" onclick="clearActiveDoc()" title="Remove document">✕</button>
+            </div>
+
+            <div class="section-label">Study Sessions</div>
+            <div class="history-list" id="historyList">
+                <!-- Dynamically loaded conversation list -->
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="main-stage">
+            <header class="app-header">
+                <div class="brand-section">
+                    <div class="logo-badge">🧠</div>
+                    <div>
+                        <div class="brand-title" th:text="${appName}">StudyMind AI</div>
+                        <div class="brand-sub">Java-Powered Context-Aware Intelligent Study Assistant</div>
+                    </div>
+                </div>
+                <div class="badge">
+                    <span class="pulse-dot"></span>
+                    <span id="sessionStatus">Session Active</span>
+                </div>
+            </header>
+
+            <!-- Quick Active Recall Action Bar -->
+            <div class="study-tools-bar">
+                <button class="tool-btn" onclick="generateStudyAid('summary')">
+                    <span>📝</span>
+                    <span>Summary</span>
+                </button>
+                <button class="tool-btn" onclick="generateStudyAid('mcqs')">
+                    <span>🎯</span>
+                    <span>5 MCQs</span>
+                </button>
+                <button class="tool-btn" onclick="generateStudyAid('flashcards')">
+                    <span>⚡</span>
+                    <span>5 Flashcards</span>
+                </button>
+            </div>
+
+            <div class="chat-window" id="chatWindow">
+                <div class="message-row ai">
+                    <div class="avatar">AI</div>
+                    <div class="message-content">Hello! I am your StudyMind AI academic mentor. Previous study sessions are saved in the sidebar. How can I help you today?</div>
+                </div>
+            </div>
+
+            <footer class="chat-footer">
+                <form class="input-container" id="chatForm" onsubmit="event.preventDefault(); submitChat();">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        class="chat-input" 
+                        placeholder="Ask a question or follow-up doubt..." 
+                        autocomplete="off"
+                        required
+                    />
+                    <button type="submit" id="sendBtn" class="send-btn">
+                        <span>Send</span>
+                        <span>➤</span>
+                    </button>
+                </form>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Script handling DB History & Multi-turn Interactions -->
+    <script>
+        const chatWindow = document.getElementById('chatWindow');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const historyList = document.getElementById('historyList');
+
+        let currentConversationId = null;
+
+        // Load conversation list and document state on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConversations();
+            checkCurrentDoc();
+        });
+
+        async function checkCurrentDoc() {
+            try {
+                const res = await fetch('/api/documents/current');
+                const data = await res.json();
+                const badge = document.getElementById('activeDocBadge');
+                const info = document.getElementById('activeDocInfo');
+
+                if (data.active) {
+                    badge.style.display = 'flex';
+                    info.innerText = `📄 ${data.fileName} (${data.totalPages} pgs, ${data.totalWords} words)`;
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Error checking active document', err);
+            }
+        }
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size exceeds the 5 MB limit. Please select a smaller file.');
+                event.target.value = '';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            appendMessage('ai', `⏳ Uploading and extracting text from "${file.name}"... Please wait.`);
+
+            try {
+                const res = await fetch('/api/documents/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    appendMessage('ai', `✅ "${data.fileName}" loaded successfully! (${data.totalPages} pages, ${data.totalWords} words). You can now ask questions based on this file.`);
+                    checkCurrentDoc();
+                } else {
+                    appendMessage('ai', `❌ Upload failed: ${data.message}`);
+                }
+            } catch (err) {
+                appendMessage('ai', '❌ Network error during file upload.');
+            } finally {
+                event.target.value = '';
+            }
+        }
+
+        async function clearActiveDoc() {
+            if (!confirm('Remove the currently active study file?')) return;
+            try {
+                await fetch('/api/documents/clear', { method: 'DELETE' });
+                checkCurrentDoc();
+                appendMessage('ai', 'Study document removed. Resuming standard AI tutor mode.');
+            } catch (err) {
+                alert('Failed to clear document.');
+            }
+        }
+
+        async function generateStudyAid(type) {
+            const labelMap = {
+                'summary': 'Summary',
+                'mcqs': '5 MCQs with Explanations',
+                'flashcards': '5 Flashcards'
+            };
+            appendMessage('user', `Generate ${labelMap[type]} for my uploaded study file.`);
+            createTypingBubble();
+
+            try {
+                const res = await fetch(`/api/study/${type}`, { method: 'POST' });
+                const data = await res.json();
+                removeTypingBubble();
+
+                if (data.success && data.data) {
+                    appendMessage('ai', data.data);
+                } else {
+                    appendMessage('ai', `⚠️ ${data.error || 'Failed to generate study aid. Make sure a study document is uploaded.'}`);
+                }
+            } catch (err) {
+                removeTypingBubble();
+                appendMessage('ai', 'Error generating study aid. Please try again.');
+            }
+        }
+
+        async function loadConversations() {
+            try {
+                const res = await fetch('/api/chat/conversations');
+                const list = await res.json();
+                historyList.innerHTML = '';
+
+                list.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = `history-item ${item.id === currentConversationId ? 'active' : ''}`;
+                    el.onclick = () => selectConversation(item.id);
+
+                    const titleSpan = document.createElement('span');
+                    titleSpan.className = 'history-title';
+                    titleSpan.innerText = item.title;
+
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'delete-chat-btn';
+                    delBtn.innerHTML = '✕';
+                    delBtn.title = 'Delete session';
+                    delBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteConversation(item.id);
+                    };
+
+                    el.appendChild(titleSpan);
+                    el.appendChild(delBtn);
+                    historyList.appendChild(el);
+                });
+            } catch (err) {
+                console.error('Failed to load conversations:', err);
+            }
+        }
+
+        async function selectConversation(id) {
+            currentConversationId = id;
+            loadConversations();
+            chatWindow.innerHTML = '';
+
+            try {
+                const res = await fetch(`/api/chat/conversations/${id}/messages`);
+                const messages = await res.json();
+                if (messages.length === 0) {
+                    appendMessage('ai', 'This session is ready. Ask your question!');
+                } else {
+                    messages.forEach(msg => appendMessage(msg.sender, msg.content));
+                }
+            } catch (err) {
+                appendMessage('ai', 'Could not load messages for this session.');
+            }
+        }
+
+        function startNewChat() {
+            currentConversationId = null;
+            chatWindow.innerHTML = '';
+            appendMessage('ai', 'Starting a new study session! What topic are you working on?');
+            loadConversations();
+            messageInput.focus();
+        }
+
+        async function deleteConversation(id) {
+            if (!confirm('Delete this study session?')) return;
+            try {
+                await fetch(`/api/chat/conversations/${id}`, { method: 'DELETE' });
+                if (currentConversationId === id) {
+                    startNewChat();
+                } else {
+                    loadConversations();
+                }
+            } catch (err) {
+                alert('Failed to delete session');
+            }
+        }
+
+        function appendMessage(sender, text) {
+            const row = document.createElement('div');
+            row.className = `message-row ${sender}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerText = sender === 'user' ? 'ME' : 'AI';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-content';
+            bubble.innerText = text;
+
+            row.appendChild(avatar);
+            row.appendChild(bubble);
+            chatWindow.appendChild(row);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function createTypingBubble() {
+            const row = document.createElement('div');
+            row.className = 'message-row ai';
+            row.id = 'typingBubble';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerText = 'AI';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-content';
+            bubble.innerHTML = '<span class="typing-indicator"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span> Thinking...</span>';
+
+            row.appendChild(avatar);
+            row.appendChild(bubble);
+            chatWindow.appendChild(row);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function removeTypingBubble() {
+            const bubble = document.getElementById('typingBubble');
+            if (bubble) bubble.remove();
+        }
+
+        async function submitChat() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            appendMessage('user', text);
+            messageInput.value = '';
+            messageInput.disabled = true;
+            sendBtn.disabled = true;
+
+            createTypingBubble();
+
+            try {
+                const response = await fetch('/api/chat/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: text,
+                        conversationId: currentConversationId
+                    })
+                });
+
+                const data = await response.json();
+                removeTypingBubble();
+
+                if (data.success && data.reply) {
+                    appendMessage('ai', data.reply);
+                    if (data.conversationId && data.conversationId !== currentConversationId) {
+                        currentConversationId = data.conversationId;
+                        loadConversations();
+                    }
+                } else {
+                    appendMessage('ai', data.error || 'Something went wrong while getting the answer.');
+                }
+            } catch (err) {
+                removeTypingBubble();
+                appendMessage('ai', 'Error connecting to the server. Please check your connection.');
+            } finally {
+                messageInput.disabled = false;
+                sendBtn.disabled = false;
+                messageInput.focus();
+            }
+        }
+    </script>
+</body>
+</html>
