@@ -30,7 +30,7 @@ public class ChatApiController {
         }
 
         try {
-            ChatResponse response = chatService.processChatWithHistory(request.getMessage(), request.getConversationId());
+            ChatResponse response = chatService.processChatWithHistory(request.getMessage(), request.getConversationId(), request.getModel());
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             return ResponseEntity.ok(ChatResponse.failure("An error occurred while communicating with the AI tutor."));

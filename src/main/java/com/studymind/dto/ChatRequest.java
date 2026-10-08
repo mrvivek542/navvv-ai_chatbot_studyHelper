@@ -11,6 +11,7 @@ public class ChatRequest {
 
     private String message;
     private Long conversationId;
+    private String model;
 
     public ChatRequest() {
     }
@@ -22,6 +23,12 @@ public class ChatRequest {
     public ChatRequest(String message, Long conversationId) {
         this.message = message;
         this.conversationId = conversationId;
+    }
+
+    public ChatRequest(String message, Long conversationId, String model) {
+        this.message = message;
+        this.conversationId = conversationId;
+        this.model = model;
     }
 
     public String getMessage() {
@@ -38,5 +45,13 @@ public class ChatRequest {
 
     public void setConversationId(Long conversationId) {
         this.conversationId = conversationId;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
     }
 }

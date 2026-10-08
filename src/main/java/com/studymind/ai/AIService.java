@@ -17,4 +17,13 @@ public interface AIService {
      * @return Generated text response from the AI model.
      */
     String generateResponse(String prompt);
+
+    /**
+     * Sends a prompt using a specific requested model name.
+     *
+     * @param prompt The prompt to execute.
+     * @param modelName Specific model identifier (e.g. gemini-3.5-flash-lite, gemini-3.8-flash, gemini-2.5-pro).
+     * @return Generated text response.
+     */
+    String generateResponseWithModel(String prompt, String modelName);
 }

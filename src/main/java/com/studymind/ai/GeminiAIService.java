@@ -43,6 +43,11 @@ public class GeminiAIService implements AIService {
 
     @Override
     public String generateResponse(String prompt) {
+        return generateResponseWithModel(prompt, this.model);
+    }
+
+    @Override
+    public String generateResponseWithModel(String prompt, String modelName) {
         if (apiKey == null || apiKey.trim().isEmpty()) {
             logger.warn("Gemini API key is not configured.");
             return "Notice: Gemini API Key is not set. Please set the GEMINI_API_KEY environment variable to chat with the live AI model.";
@@ -52,9 +57,11 @@ public class GeminiAIService implements AIService {
             return "Please enter a valid message.";
         }
 
+        String chosenModel = (modelName != null && !modelName.trim().isEmpty()) ? modelName.trim() : this.model;
+
         try {
             String url = "https://generativelanguage.googleapis.com/v1beta/models/" 
-                    + model + ":generateContent?key=" + apiKey.trim();
+                    + chosenModel + ":generateContent?key=" + apiKey.trim();
 
             String escapedPrompt = escapeJson(prompt);
             String requestBody = "{\"contents\":[{\"parts\":[{\"text\":\"" + escapedPrompt + "\"}]}]}";

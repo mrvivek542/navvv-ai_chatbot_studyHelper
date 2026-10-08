@@ -74,6 +74,11 @@ public class ChatService {
 
     @Transactional
     public ChatResponse processChatWithHistory(String userMessage, Long conversationId) {
+        return processChatWithHistory(userMessage, conversationId, null);
+    }
+
+    @Transactional
+    public ChatResponse processChatWithHistory(String userMessage, Long conversationId, String model) {
         if (userMessage == null || userMessage.trim().isEmpty()) {
             return ChatResponse.failure("Message cannot be empty.");
         }
@@ -111,7 +116,7 @@ public class ChatService {
             } else {
                 // Send grounded context to AI
                 String ragPrompt = promptService.buildGroundedRagPrompt(userMessage, topChunks);
-                aiReply = aiService.generateResponse(ragPrompt);
+                aiReply = aiService.generateResponseWithModel(ragPrompt, model);
             }
         } else {
             // ==========================================
@@ -130,7 +135,7 @@ public class ChatService {
                 }
             }
             promptBuilder.append("Tutor: ");
-            aiReply = aiService.generateResponse(promptBuilder.toString());
+            aiReply = aiService.generateResponseWithModel(promptBuilder.toString(), model);
         }
 
         // 2. Save and Return AI Response
