@@ -65,11 +65,33 @@ Explain this sequence when demonstrating the project to your teacher:
 
 ---
 
-## 🛡️ 6. Privacy & Security Measures
-- **No API Key Leaks:** API keys are never hardcoded. They are injected at runtime via environment variables (`${GEMINI_API_KEY}`).
-- **Local Storage:** Uploaded files and session databases remain local to the user's computer and are excluded from Git via `.gitignore`.
-- **Anti-Hallucination Guard:** If a query cannot be answered using the uploaded document, the system explicitly tells the student:
-  > *"I couldn't find enough information in your uploaded sources."*
+## 🛡️ 6. Enterprise Privacy & Defensive Security Hardening
+Our application implements multi-layered defensive security across all tiers:
+
+1. **Role-Based Access Control (RBAC) & Spring Security:**
+   - Administrative paths and `/h2-console/**` are strictly protected behind `ROLE_ADMIN` authentication.
+   - Passwords are encrypted with **BCrypt (12 hashing rounds)**; plaintext passwords are never stored.
+2. **Denial-of-Service (DoS) & Quota Rate Limiting:**
+   - `RateLimitingFilter` enforces a token-bucket limit per client IP (120 req/min general, 30 req/min for AI-heavy endpoints).
+   - Prevents API budget exhaustion and brute-force attacks by returning HTTP 429 (`Too Many Requests`).
+3. **Cross-Site Scripting (XSS) & Input Sanitization:**
+   - User inputs and chat prompts are sanitized using `InputSanitizer` powered by `Jsoup.clean(..., Safelist.none())`, stripping all injected JavaScript and HTML.
+4. **Formula & CSV Injection Defense:**
+   - Exported spreadsheet cells beginning with `=`, `+`, `-`, or `@` are sanitized with `'` to neutralize formula execution in Microsoft Excel.
+5. **Path Traversal & SSRF Prevention:**
+   - Uploaded filenames are stripped of directory traversal sequences (`..`, `/`, `\`).
+   - YouTube summarization verifies valid protocols and restricts hostnames strictly to YouTube domains.
+6. **Hardened Security Headers:**
+   - `Content-Security-Policy (CSP)`: Restricts script and resource loading to trusted CDNs and origin.
+   - `X-Frame-Options: SAMEORIGIN`: Prevents clickjacking.
+   - `X-Content-Type-Options: nosniff`: Prevents MIME-type sniffing.
+   - `Referrer-Policy: strict-origin-when-cross-origin`.
+7. **Environment Variable Isolation:**
+   - Real Gemini API keys and database credentials are read strictly from OS environment variables (`$env:GEMINI_API_KEY`).
+   - Repository includes `.env.example` as a safe template. Git commit logs have been verified to contain zero leaked secrets.
+8. **Production Debug Mode Disabled:**
+   - Server stack trace leakage in HTTP error responses is disabled (`server.error.include-stacktrace=never`).
+   - H2 web console remote access is disabled (`web-allow-others=false`).
 
 ---
 

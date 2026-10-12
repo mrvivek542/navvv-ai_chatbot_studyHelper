@@ -101,11 +101,18 @@ com.studymind
 
 ---
 
-## 🔒 Privacy & Security Guarantee
+## 🔒 Privacy & Enterprise Security Hardening
 
-- **Zero API Key Exposure:** API keys are never stored in code or repository files. The system reads `GEMINI_API_KEY` directly from environment variables.
-- **Local-Only Storage:** Uploaded lecture materials and conversation histories remain stored locally in `./data/studymind_db` and are protected by `.gitignore`.
-- **Public Safety:** All temporary files, database files, logs, and development environment files are ignored by default.
+- **Zero API Key Exposure:** API keys are never committed or exposed. Injected dynamically via environment variable `${GEMINI_API_KEY}`.
+- **Spring Security & Role-Based Access Control:** Administrative routes and the embedded H2 Console are guarded behind `ROLE_ADMIN` authentication.
+- **BCrypt Password Hashing:** User passwords are encrypted with BCrypt (12 rounds) — zero plaintext storage.
+- **DoS & AI Quota Rate Limiting:** `RateLimitingFilter` enforces a token bucket per client IP (120 req/min general, 30 req/min for AI endpoints), preventing abuse and DoS.
+- **XSS & Prompt Injection Defense:** All user inputs and chat prompts pass through `InputSanitizer` (HTML stripping via Jsoup `Safelist.none()`).
+- **CSV / Formula Injection Neutralization:** Notes exported to Excel beginning with `=`, `+`, `-`, or `@` are safely escaped.
+- **Path Traversal & SSRF Prevention:** Filenames are strictly sanitized, and YouTube video summarization enforces validated YouTube domain whitelisting.
+- **Hardened Security Headers:** Strict CSP, `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, and Referrer-Policy applied across all responses.
+- **Production Error Masking:** Internal stack traces and binding exceptions are strictly hidden from users.
+- **Local-Only Database:** Uploaded lecture materials and conversation histories remain strictly on the host machine in `./data/studymind_db` and are excluded from Git via `.gitignore`.
 
 ---
 

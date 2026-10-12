@@ -54,10 +54,7 @@ public class DocumentIngestionService {
             throw new IllegalArgumentException("File size exceeds 5 MB limit. Please upload a smaller study file.");
         }
 
-        String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || originalFilename.trim().isEmpty()) {
-            originalFilename = "uploaded_file";
-        }
+        String originalFilename = com.studymind.security.InputSanitizer.sanitizeFilename(file.getOriginalFilename());
 
         String lowerName = originalFilename.toLowerCase();
         ExtractedDocument doc;

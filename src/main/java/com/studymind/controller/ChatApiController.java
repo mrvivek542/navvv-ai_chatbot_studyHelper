@@ -25,12 +25,17 @@ public class ChatApiController {
 
     @PostMapping("/send")
     public ResponseEntity<ChatResponse> sendMessage(@RequestBody ChatRequest request) {
-        if (request == null || request.getMessage() == null || request.getMessage().trim().isEmpty()) {
+        if (request == null || request.getMessage() == null) {
             return ResponseEntity.badRequest().body(ChatResponse.failure("Message cannot be empty."));
         }
 
+        String sanitizedMessage = com.studymind.security.InputSanitizer.sanitizeText(request.getMessage());
+        if (sanitizedMessage.isEmpty()) {
+            return ResponseEntity.badRequest().body(ChatResponse.failure("Message cannot be empty or contain only unsafe characters."));
+        }
+
         try {
-            ChatResponse response = chatService.processChatWithHistory(request.getMessage(), request.getConversationId(), request.getModel());
+            ChatResponse response = chatService.processChatWithHistory(sanitizedMessage, request.getConversationId(), request.getModel());
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             return ResponseEntity.ok(ChatResponse.failure("An error occurred while communicating with the AI tutor."));
