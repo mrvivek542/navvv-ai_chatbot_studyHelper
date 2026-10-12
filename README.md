@@ -8,8 +8,6 @@
 
 An interactive, full-stack AI study assistant and revision platform built in **Java 21**, **Spring Boot**, and **Apache PDFBox**. Designed for students to converse with academic course materials, retain multi-turn context, generate revision notes, and perform **Retrieval-Augmented Generation (RAG)** grounded with exact page-level citations.
 
-> 🎓 **For Teachers & Evaluators:** Check out the complete [Teacher & Viva Presentation Guide](TEACHER_VIVA_GUIDE.md) explaining the OOP design patterns, RAG pipeline, and answers to common evaluation questions.
-
 ---
 
 ## 🌟 Key Features
