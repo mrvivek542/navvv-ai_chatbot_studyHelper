@@ -1,5 +1,6 @@
 package com.studymind.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class Conversation {
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("timestamp ASC")
+    @JsonIgnore
     private List<ChatMessage> messages = new ArrayList<>();
 
     public Conversation() {

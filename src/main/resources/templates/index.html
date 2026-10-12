@@ -55,7 +55,7 @@
                     Study smarter with your own <span class="gradient-text">AI mentor</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Transform dense textbooks, lecture notes, and YouTube lectures into interactive study companions with zero hallucinations, in-memory RAG, and exact page-level citations.
+                    Transform dense textbooks, lecture notes, and YouTube lectures into interactive study companions with document-grounded answers, in-memory RAG, and exact page-level citations.
                 </p>
                 <div class="hero-cta-group">
                     <a href="#live-app" class="hero-btn-primary">
@@ -74,8 +74,8 @@
                     </div>
                     <div class="hero-stat-sep" aria-hidden="true"></div>
                     <div class="hero-stat-item">
-                        <span class="stat-number">0%</span>
-                        <span class="stat-label">Hallucinations</span>
+                        <span class="stat-number">Verified</span>
+                        <span class="stat-label">Document Grounded</span>
                     </div>
                     <div class="hero-stat-sep" aria-hidden="true"></div>
                     <div class="hero-stat-item">
@@ -252,9 +252,9 @@
                         <div class="step-icon">🔍</div>
                         <h3 class="step-title">Ask Doubts & Search Notes</h3>
                         <p class="step-desc">
-                            Type questions in natural language. In-memory TF-IDF calculates semantic keyword similarity to surface top passages with zero hallucinations.
+                            Type questions in natural language. In-memory TF-IDF calculates semantic keyword similarity to retrieve top passages grounded directly in your uploaded material.
                         </p>
-                        <div class="step-tag">TF-IDF Vector Matching • Anti-Hallucination</div>
+                        <div class="step-tag">TF-IDF Vector Matching • Grounded Context</div>
                     </div>
                 </div>
 
@@ -451,6 +451,43 @@
             </div>
         </div>
     </footer>
+ 
+    <!-- Accessible In-App YouTube Summarizer Modal Dialog -->
+    <div id="youtubeModal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-labelledby="ytModalTitle" onclick="if(event.target === this) closeYouTubeModal()">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <span class="modal-icon">▶️</span>
+                    <h3 id="ytModalTitle" class="modal-title">YouTube Lecture Summarizer</h3>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeYouTubeModal()" aria-label="Close dialog">✕</button>
+            </div>
+            <form id="youtubeForm" onsubmit="submitYouTubeSummary(event)">
+                <div class="modal-body">
+                    <p class="modal-desc">
+                        Paste a valid educational YouTube video URL. StudyMind AI will parse video captions and synthesize structured lecture notes, key takeaways, and revision points.
+                    </p>
+                    <label for="ytUrlInput" class="modal-label">YouTube Video URL</label>
+                    <input 
+                        type="url" 
+                        id="ytUrlInput" 
+                        class="modal-input" 
+                        placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." 
+                        autocomplete="off"
+                        required
+                    />
+                    <div id="ytModalError" class="modal-error-message" role="alert" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="ytCancelBtn" class="modal-btn-cancel" onclick="closeYouTubeModal()">Cancel</button>
+                    <button type="submit" id="ytSubmitBtn" class="modal-btn-primary">
+                        <span>Generate Notes</span>
+                        <span>➔</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Script handling DB History & Multi-turn Interactions -->
     <script>
@@ -587,31 +624,128 @@
             }
         }
 
-        async function promptYouTubeSummary() {
-            const url = prompt('Enter a YouTube video URL to generate comprehensive lecture notes & summary:');
-            if (!url || !url.trim()) return;
+        /* YouTube Summarizer Modal Dialog Logic */
+        function openYouTubeModal() {
+            const modal = document.getElementById('youtubeModal');
+            const input = document.getElementById('ytUrlInput');
+            const errEl = document.getElementById('ytModalError');
+            if (!modal) return;
+            if (errEl) {
+                errEl.innerText = '';
+                errEl.style.display = 'none';
+            }
+            if (input) {
+                input.value = '';
+                input.disabled = false;
+            }
+            const submitBtn = document.getElementById('ytSubmitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Generate Notes</span><span>➔</span>';
+            }
+            modal.classList.add('modal-active');
+            modal.setAttribute('aria-hidden', 'false');
+            setTimeout(() => input?.focus(), 100);
+        }
 
-            appendMessage('user', `▶️ Generate study notes from YouTube: ${url.trim()}`);
+        function closeYouTubeModal() {
+            const modal = document.getElementById('youtubeModal');
+            if (!modal) return;
+            modal.classList.remove('modal-active');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function isValidYouTubeUrlClient(url) {
+            if (!url) return false;
+            try {
+                const parsed = new URL(url.trim());
+                if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+                const host = parsed.hostname.toLowerCase();
+                return host === 'youtube.com' || host === 'www.youtube.com' || host === 'm.youtube.com' || host === 'youtu.be' || host.endsWith('.youtube.com');
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function submitYouTubeSummary(e) {
+            if (e) e.preventDefault();
+            const input = document.getElementById('ytUrlInput');
+            const errEl = document.getElementById('ytModalError');
+            const submitBtn = document.getElementById('ytSubmitBtn');
+            const cancelBtn = document.getElementById('ytCancelBtn');
+
+            const url = input?.value?.trim() || '';
+
+            if (!url) {
+                if (errEl) {
+                    errEl.innerText = 'Please enter a YouTube video URL.';
+                    errEl.style.display = 'block';
+                }
+                input?.focus();
+                return;
+            }
+
+            if (!isValidYouTubeUrlClient(url)) {
+                if (errEl) {
+                    errEl.innerText = 'Invalid YouTube URL. Please enter a valid YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...).';
+                    errEl.style.display = 'block';
+                }
+                input?.focus();
+                return;
+            }
+
+            // Valid URL - proceed with request
+            if (errEl) {
+                errEl.innerText = '';
+                errEl.style.display = 'none';
+            }
+
+            input.disabled = true;
+            if (cancelBtn) cancelBtn.disabled = true;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>Processing Video...</span>';
+            }
+
+            closeYouTubeModal();
+            appendMessage('user', `▶️ Generate study notes from YouTube: ${url}`);
             createTypingBubble();
+            showToast('Fetching YouTube transcript and synthesizing notes...', 'info');
 
             try {
                 const res = await fetch('/api/modern/youtube-summary', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: url.trim() })
+                    body: JSON.stringify({ url: url })
                 });
                 const data = await res.json();
                 removeTypingBubble();
 
                 if (data.success && data.data) {
                     appendMessage('ai', data.data);
+                    showToast('YouTube lecture notes generated successfully!', 'success');
                 } else {
-                    appendMessage('ai', `⚠️ ${data.error || 'Could not process the YouTube link.'}`);
+                    const errMessage = data.error || 'Could not process the YouTube link.';
+                    appendMessage('ai', `⚠️ ${errMessage}`);
+                    showToast(errMessage, 'error');
                 }
             } catch (err) {
                 removeTypingBubble();
-                appendMessage('ai', 'Error processing YouTube video.');
+                appendMessage('ai', 'Error communicating with server while processing YouTube video.');
+                showToast('Error processing YouTube video', 'error');
+            } finally {
+                input.disabled = false;
+                if (cancelBtn) cancelBtn.disabled = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>Generate Notes</span><span>➔</span>';
+                }
             }
+        }
+
+        // Kept for backward compatibility
+        function promptYouTubeSummary() {
+            openYouTubeModal();
         }
 
         function getAllChatText() {
@@ -697,10 +831,27 @@
         async function loadConversations() {
             try {
                 const res = await fetch('/api/chat/conversations');
-                const list = await res.json();
+                if (!res.ok) {
+                    throw new Error(`Server returned HTTP ${res.status}`);
+                }
+                const data = await res.json();
                 historyList.innerHTML = '';
 
-                if (!list || list.length === 0) {
+                // Handle error object response (e.g. { success: false, error: "..." })
+                if (data && data.success === false) {
+                    historyList.innerHTML = `
+                        <div class="empty-sessions">
+                            <span class="empty-icon">⚠️</span>
+                            <p class="empty-text">${data.error || 'Could not load sessions.'}</p>
+                            <button class="retry-btn" onclick="loadConversations()">Retry</button>
+                        </div>`;
+                    return;
+                }
+
+                // Safely ensure data is an iterable array
+                const list = Array.isArray(data) ? data : [];
+
+                if (list.length === 0) {
                     historyList.innerHTML = `
                         <div class="empty-sessions">
                             <span class="empty-icon">💭</span>
@@ -710,18 +861,20 @@
                 }
 
                 list.forEach(item => {
+                    if (!item || typeof item !== 'object') return;
                     const el = document.createElement('div');
                     el.className = `history-item ${item.id === currentConversationId ? 'active' : ''}`;
                     el.onclick = () => selectConversation(item.id);
 
                     const titleSpan = document.createElement('span');
                     titleSpan.className = 'history-title';
-                    titleSpan.innerText = item.title;
+                    titleSpan.innerText = item.title || 'Untitled Session';
 
                     const delBtn = document.createElement('button');
                     delBtn.className = 'delete-chat-btn';
                     delBtn.innerHTML = '✕';
                     delBtn.title = 'Delete session';
+                    delBtn.setAttribute('aria-label', `Delete session ${item.title || ''}`);
                     delBtn.onclick = (e) => {
                         e.stopPropagation();
                         deleteConversation(item.id);
@@ -733,6 +886,11 @@
                 });
             } catch (err) {
                 console.error('Failed to load conversations:', err);
+                historyList.innerHTML = `
+                    <div class="empty-sessions">
+                        <span class="empty-icon">⚠️</span>
+                        <p class="empty-text">Failed to load sessions.<br><button class="retry-btn" onclick="loadConversations()">Tap to Retry</button></p>
+                    </div>`;
             }
         }
 
@@ -743,11 +901,17 @@
 
             try {
                 const res = await fetch(`/api/chat/conversations/${id}/messages`);
-                const messages = await res.json();
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const messages = Array.isArray(data) ? data : [];
                 if (messages.length === 0) {
                     appendMessage('ai', 'This session is ready. Ask your question!');
                 } else {
-                    messages.forEach(msg => appendMessage(msg.sender, msg.content));
+                    messages.forEach(msg => {
+                        if (msg && msg.sender && msg.content) {
+                            appendMessage(msg.sender, msg.content);
+                        }
+                    });
                 }
             } catch (err) {
                 appendMessage('ai', 'Could not load messages for this session.');
@@ -939,6 +1103,13 @@
                     }
                 });
             }
+
+            // Keyboard shortcut: Escape to close YouTube modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeYouTubeModal();
+                }
+            });
         });
     </script>
 </body>

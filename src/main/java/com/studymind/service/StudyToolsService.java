@@ -52,7 +52,7 @@ public class StudyToolsService {
     private ExtractedDocument getActiveDocOrThrow() {
         ExtractedDocument doc = ingestionService.getCurrentDocument();
         if (doc == null) {
-            throw new IllegalStateException("Please upload a study document (PDF or TXT) first before generating study aids.");
+            throw new IllegalStateException("Please upload a study document (PDF, TXT, or Excel) first before generating study aids.");
         }
         return doc;
     }
