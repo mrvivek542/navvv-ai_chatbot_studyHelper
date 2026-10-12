@@ -1,38 +1,51 @@
-# StudyMind AI — Java-Powered Study Assistant 🧠
+# StudyMind AI — Java-Powered Academic Study Assistant 🧠
 
-An interactive, intelligent study assistant built with **Java 21**, **Spring Boot**, and **Apache PDFBox**, designed for students to revise course materials, engage in multi-turn tutor dialogues, and perform context-grounded Retrieval-Augmented Generation (RAG) with page-level citations.
+[![Java 21](https://img.shields.io/badge/Java-21%20LTS-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.4-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://spring.io/)
+[![Google Gemini](https://img.shields.io/badge/Google_Gemini-3.5%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com/)
+[![Database](https://img.shields.io/badge/Database-Embedded%20H2-blue?style=for-the-badge)](http://localhost:8080/h2-console)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-Developed for the **GUVI – Galgotias University Project Board** (B.Tech AIML, 3rd Semester).
+An interactive, full-stack AI study assistant and revision platform built in **Java 21**, **Spring Boot**, and **Apache PDFBox**. Designed for students to converse with academic course materials, retain multi-turn context, generate revision notes, and perform **Retrieval-Augmented Generation (RAG)** grounded with exact page-level citations.
+
+> 🎓 **For Teachers & Evaluators:** Check out the complete [Teacher & Viva Presentation Guide](TEACHER_VIVA_GUIDE.md) explaining the OOP design patterns, RAG pipeline, and answers to common evaluation questions.
 
 ---
 
 ## 🌟 Key Features
 
-1. **AI Academic Tutor (Multi-turn Chat):**
-   - Natural, encouraging academic mentor dialogue.
-   - Conversation history persisted in an embedded file-based H2 database using Spring Data JPA.
-   - Multi-turn context preservation (follow-up doubts retain earlier conversational context).
+1. **🤖 AI Academic Tutor (Multi-Turn Chat):**
+   - Natural academic mentor dialogue with encouraging tone.
+   - Preserves conversation history across sessions in a local persistent H2 database.
+   - Multi-turn context preservation (follow-up doubts retain prior conversational memory).
 
-2. **Study Material Upload & Extraction:**
-   - Supports **PDF** and **TXT** lecture notes / textbook files up to **5 MB**.
+2. **📄 Document Extraction & Processing:**
+   - Supports **PDF** and **TXT** lecture notes and textbooks up to **5 MB**.
    - Page-by-page text extraction powered by **Apache PDFBox 3.x**.
-   - Real-time client-side and server-side validation with friendly error messages.
+   - Validates file formats and file sizes with clear error handling.
 
-3. **Context-Grounded RAG (Retrieval-Augmented Generation):**
-   - Pure Java **Chunking Engine** (~500 words with 50-word sliding window overlap).
-   - In-memory **TF-IDF & Keyword Similarity Search** (no heavy external vector DB required).
+3. **🔍 Context-Grounded RAG (Retrieval-Augmented Generation):**
+   - Pure Java **Sliding-Window Chunking** (~500 words with 50-word overlap).
+   - In-memory **TF-IDF & Keyword Similarity Search** (zero heavy external vector DB required).
    - Strict source citations: `[Source: <filename>, Page <pageNumber>]`.
    - **Anti-Hallucination Guardrail:** If an answer cannot be grounded in the student's file, it politely responds:
      > *"I couldn't find enough information in your uploaded sources."*
 
-4. **Active Recall Revision Tools:**
-   - **📝 Summary:** Structured overview, key definitions, and exam takeaways.
+4. **⚡ Active Recall Revision Tools:**
+   - **📝 Structured Summary:** Core concepts, key definitions, and exam takeaways.
    - **🎯 5 MCQs:** Multiple-choice quiz questions with option distractors and explanations.
-   - **⚡ 5 Flashcards:** Front (Concept/Question) and Back (Concise Answer) for rapid self-testing.
+   - **🗂️ 5 Flashcards:** Concept / Question and concise answers for rapid self-testing.
 
-5. **Aesthetic Dark Theme Interface:**
-   - Pinterest-inspired sleek slate & indigo dark UI.
-   - Responsive layout with collapsible study session sidebar, live typing indicators, and smooth transitions.
+5. **📺 YouTube Lecture Summarizer:**
+   - Paste any educational YouTube URL to extract structured lecture notes, main topics, and bulleted takeaways.
+
+6. **💾 Note Export (PDF & Excel):**
+   - Export generated study notes and revision summaries into downloadable **PDF** files.
+   - Export structured topics directly into **Excel (.xlsx)** sheets.
+
+7. **🎨 Modern Dark Theme Interface:**
+   - Responsive slate & indigo dark UI.
+   - Session history sidebar, live typing indicators, and smooth transitions.
 
 ---
 
@@ -44,19 +57,20 @@ The project strictly follows Clean Architecture and Object-Oriented Design princ
 com.studymind
 ├── ai
 │   ├── AIService.java                   # Interface: Abstraction & DIP
-│   └── GeminiAIService.java             # Implementation: java.net.http.HttpClient
+│   └── GeminiAIService.java             # Implementation: pure java.net.http.HttpClient
 ├── controller
 │   ├── HomeController.java              # MVC view routing
 │   ├── ChatApiController.java          # REST: Conversation & messaging
 │   ├── DocumentApiController.java      # REST: File upload & status
+│   ├── ModernFeaturesController.java   # REST: YouTube notes & PDF/Excel export
 │   ├── SearchApiController.java        # REST: Diagnostic chunk search
 │   └── StudyToolsApiController.java    # REST: Summary, MCQs, Flashcards
 ├── dto
-│   ├── ChatRequest.java                 # Encapsulation of request payloads
+│   ├── ChatRequest.java                 # Request payload encapsulation
 │   ├── ChatResponse.java                # Response carrier with factory methods
 │   └── DocumentUploadResponse.java      # Upload metadata carrier
 ├── exception
-│   └── GlobalExceptionHandler.java      # AOP: Centralized error handling
+│   └── GlobalExceptionHandler.java      # AOP: Centralized exception handler
 ├── model
 │   ├── Conversation.java                # JPA Entity: One-to-Many association
 │   ├── ChatMessage.java                 # JPA Entity: Many-to-One association
@@ -66,66 +80,87 @@ com.studymind
 │   ├── TextChunk.java                   # Chunk data carrier
 │   ├── TextChunkingService.java         # Overlapping sliding window segmentation
 │   └── KeywordSimilaritySearchService.java # Pure Java TF-IDF ranking algorithm
+├── repository
+│   ├── ChatMessageRepository.java       # Spring Data JPA Repository
+│   └── ConversationRepository.java      # Spring Data JPA Repository
 └── service
-    ├── ChatService.java                 # Business orchestration
+    ├── ChatService.java                 # Conversational workflow orchestrator
+    ├── DocumentExportService.java       # Dynamic PDF & Excel document generator
     ├── DocumentIngestionService.java    # Apache PDFBox text extraction
     ├── PromptService.java               # Centralized prompt templates
-    └── StudyToolsService.java           # Active recall generation
+    ├── StudyToolsService.java           # Revision tools (MCQs, Flashcards, Summary)
+    └── YouTubeSummaryService.java       # YouTube lecture notes parser
 ```
 
-### OOP Concepts Applied:
-- **Abstraction & Polymorphism:** `AIService` decouples high-level controllers from low-level AI network calls.
-- **Encapsulation:** Entities protect internal state and use getters/setters.
-- **Composition & Association:** `Conversation` has a collection of `ChatMessage` objects (`@OneToMany`).
-- **Single Responsibility Principle (SRP):** Distinct services for Ingestion, Chunking, Search, Prompts, and Chat.
-- **Defensive Programming:** Robust validation and `@ControllerAdvice` prevent raw stack traces from reaching users.
+### Applied OOP & Design Principles:
+- **Abstraction & DIP:** `AIService` interface decouples controllers from AI network logic.
+- **Encapsulation:** Entities protect internal state with validated getters and setters.
+- **Composition & Association:** `Conversation` maintains an encapsulated collection of `ChatMessage` objects (`@OneToMany`).
+- **Single Responsibility Principle (SRP):** Dedicated services for ingestion, chunking, retrieval, prompt generation, and export.
+- **Defensive Programming:** Comprehensive validation and `@ControllerAdvice` prevent raw stack traces from reaching clients.
+
+---
+
+## 🔒 Privacy & Security Guarantee
+
+- **Zero API Key Exposure:** API keys are never stored in code or repository files. The system reads `GEMINI_API_KEY` directly from environment variables.
+- **Local-Only Storage:** Uploaded lecture materials and conversation histories remain stored locally in `./data/studymind_db` and are protected by `.gitignore`.
+- **Public Safety:** All temporary files, database files, logs, and development environment files are ignored by default.
 
 ---
 
 ## 💻 Tech Stack
 
 - **Language:** Java 21 (LTS)
-- **Framework:** Spring Boot 3.3.4 (Web, Thymeleaf, Spring Data JPA)
-- **Build Tool:** Apache Maven 3.9.9
+- **Framework:** Spring Boot 3.3.4 (Spring Web, Spring Data JPA, Thymeleaf)
+- **Build Tool:** Apache Maven 3.9+
 - **Database:** Embedded H2 Database (File-backed: `./data/studymind_db`)
 - **PDF Extraction:** Apache PDFBox 3.0.3
+- **Excel Generation:** Apache POI 5.3.0
 - **AI Integration:** Google Gemini API via `java.net.http.HttpClient`
-- **Frontend:** HTML5, CSS3 (Modern Dark Theme), Vanilla JavaScript (AJAX)
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (AJAX)
 
 ---
 
-## 🚀 How to Run Locally
+## 🚀 Getting Started
 
 ### 1. Prerequisites
-- Java JDK 21+ installed and configured on your PATH (`java -version`).
-- Apache Maven (a portable Maven is also included in this workspace).
-- A free Gemini API key from [Google AI Studio](https://aistudio.google.com/).
+- **Java JDK 21+** installed (`java -version`).
+- **Apache Maven 3.9+** installed (`mvn -version`).
+- A Gemini API key from [Google AI Studio](https://aistudio.google.com/) (free).
 
 ### 2. Configure Environment Variable
-Set your Gemini API key in your terminal session (never commit keys to git):
 
 **PowerShell (Windows):**
 ```powershell
 $env:GEMINI_API_KEY="your_gemini_api_key_here"
 ```
 
-**Bash (Linux / macOS):**
+**Command Prompt (Windows):**
+```cmd
+set GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+**Bash / Zsh (Linux / macOS):**
 ```bash
 export GEMINI_API_KEY="your_gemini_api_key_here"
 ```
 
-### 3. Build & Run Application
-```powershell
-# Compile the project
-mvn clean compile
+### 3. Run the Application
 
-# Start the Spring Boot application
+**Option A — One-Click (Windows):**
+Double-click `run.bat` or run:
+```cmd
+run.bat
+```
+
+**Option B — Maven Command:**
+```bash
 mvn spring-boot:run
 ```
 
-### 4. Access the App
-Open your browser and navigate to:
-- **Web Dashboard:** [http://localhost:8080](http://localhost:8080)
+### 4. Access the Application
+- **Main Web Interface:** [http://localhost:8080](http://localhost:8080)
 - **H2 Database Console:** [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
   - JDBC URL: `jdbc:h2:file:./data/studymind_db`
   - Username: `sa`
@@ -133,7 +168,22 @@ Open your browser and navigate to:
 
 ---
 
-## 🔮 Future Scope
-- Transition from keyword TF-IDF to dense vector embeddings using `pgvector` or Milvus.
-- Multi-document cross-comparison and synthesis.
-- Audio flashcard playback using Web Speech API.
+## 📚 API Endpoints Summary
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | Main Chat & Study Dashboard |
+| `POST` | `/api/chat/send` | Send question and receive context-grounded AI reply |
+| `POST` | `/api/documents/upload` | Upload PDF or TXT study file |
+| `GET` | `/api/documents/status` | Get active document metadata and page count |
+| `POST` | `/api/tools/summary` | Generate structured revision summary |
+| `POST` | `/api/tools/mcqs` | Generate 5 multiple-choice questions |
+| `POST` | `/api/tools/flashcards` | Generate 5 active-recall flashcards |
+| `POST` | `/api/modern/youtube-summary` | Summarize educational YouTube video |
+| `POST` | `/api/modern/export/pdf` | Export study notes as a PDF file |
+| `POST` | `/api/modern/export/excel` | Export study topics as an Excel spreadsheet |
+
+---
+
+## 📄 License
+This project is open-source and available under the [MIT License](LICENSE).

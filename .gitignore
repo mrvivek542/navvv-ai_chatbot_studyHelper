@@ -1,9 +1,51 @@
+# ==========================================
+# Build Artifacts
+# ==========================================
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+build/
+dist/
 
-### STS ###
+# ==========================================
+# Local Database & Storage (Privacy / No Leak)
+# ==========================================
+data/
+*.mv.db
+*.trace.db
+*.db
+
+# ==========================================
+# Environment Variables & Secrets (Privacy)
+# ==========================================
+.env
+.env.*
+!.env.example
+application-local.properties
+application-secret.properties
+*.key
+*credentials*
+*secret*
+
+# ==========================================
+# Logs & Temporary Files
+# ==========================================
+*.log
+logs/
+temp/
+tmp/
+scratch/
+starter/
+
+# ==========================================
+# IDE & Editor Configurations
+# ==========================================
+.vscode/
+.idea/
+*.iws
+*.iml
+*.ipr
 .apt_generated
 .classpath
 .factorypath
@@ -11,32 +53,14 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
 /nbproject/private/
 /nbbuild/
-/dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
-.vscode/
-
-### OS / Environment ###
+# ==========================================
+# Operating System Files
+# ==========================================
 .DS_Store
 Thumbs.db
-*.log
-.env
-application-local.properties
-data/
-*.mv.db
-*.trace.db
+desktop.ini
