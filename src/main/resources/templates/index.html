@@ -3,13 +3,294 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${appName}">StudyMind AI</title>
+    <title th:text="${appName}">StudyMind AI — Academic Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-    <div class="app-wrapper">
+    <!-- Ambient Animated Gradient Blobs & Cyber Grid -->
+    <div class="ambient-glow glow-1" aria-hidden="true"></div>
+    <div class="ambient-glow glow-2" aria-hidden="true"></div>
+    <div class="ambient-glow glow-3" aria-hidden="true"></div>
+    <div class="cyber-grid" aria-hidden="true"></div>
+
+    <!-- Floating Toast Notification System -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- 1. Sticky Glass Navbar -->
+    <nav class="sticky-nav" id="mainNav">
+        <div class="nav-container">
+            <a href="#" class="nav-brand">
+                <span class="nav-logo-badge">✦</span>
+                <span class="nav-brand-text">StudyMind <span class="nav-ai-chip">AI</span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How it Works</a>
+                <a href="#live-app" class="nav-link">Live App</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-toggle-btn nav-theme-toggle" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Dark and Light Mode">
+                    <span id="navThemeIcon">☀️</span>
+                </button>
+                <a href="#live-app" class="btn-launch-glow">
+                    <span>Launch App</span>
+                    <span class="btn-arrow">➔</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 2. Hero Section -->
+    <section class="hero-section" id="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-pill">
+                    <span class="hero-pill-pulse"></span>
+                    <span>Next-Gen Academic Mentor • Java 21 & Gemini 3.5</span>
+                </div>
+                <h1 class="hero-title">
+                    Study smarter with your own <span class="gradient-text">AI mentor</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Transform dense textbooks, lecture notes, and YouTube lectures into interactive study companions with zero hallucinations, in-memory RAG, and exact page-level citations.
+                </p>
+                <div class="hero-cta-group">
+                    <a href="#live-app" class="hero-btn-primary">
+                        <span>Launch Study Mind</span>
+                        <span class="btn-arrow">➔</span>
+                    </a>
+                    <a href="#features" class="hero-btn-secondary">
+                        <span>Explore Capabilities</span>
+                        <span>↓</span>
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat-item">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">In-Memory Java RAG</span>
+                    </div>
+                    <div class="hero-stat-sep" aria-hidden="true"></div>
+                    <div class="hero-stat-item">
+                        <span class="stat-number">0%</span>
+                        <span class="stat-label">Hallucinations</span>
+                    </div>
+                    <div class="hero-stat-sep" aria-hidden="true"></div>
+                    <div class="hero-stat-item">
+                        <span class="stat-number">Instant</span>
+                        <span class="stat-label">Page Citations</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-preview-wrapper">
+                <div class="hero-floating-card">
+                    <div class="preview-header">
+                        <div class="preview-dots" aria-hidden="true">
+                            <span class="dot dot-r"></span>
+                            <span class="dot dot-y"></span>
+                            <span class="dot dot-g"></span>
+                        </div>
+                        <div class="preview-title">StudyMind AI Mentor • Interactive Preview</div>
+                        <div class="preview-status"><span class="pulse-dot"></span> Online</div>
+                    </div>
+                    <div class="preview-body">
+                        <div class="preview-msg preview-user">
+                            <div class="preview-avatar">ME</div>
+                            <div class="preview-bubble">Can you explain Dijkstra's algorithm and cite where it's mentioned in my uploaded notes?</div>
+                        </div>
+                        <div class="preview-msg preview-ai">
+                            <div class="preview-avatar">AI</div>
+                            <div class="preview-bubble">
+                                Dijkstra's Algorithm finds the shortest path between nodes in a weighted graph using a greedy strategy with a priority queue.
+                                <div class="preview-citation">📍 [Source: Algorithms_Unit3.pdf, Page 42]</div>
+                            </div>
+                        </div>
+                        <div class="preview-chips">
+                            <span class="preview-chip">📝 Summary</span>
+                            <span class="preview-chip">🎯 5 MCQs</span>
+                            <span class="preview-chip">⚡ 5 Flashcards</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Features Section -->
+    <section class="features-section" id="features">
+        <div class="section-container">
+            <div class="section-badge-center">
+                <span>✦ POWERFUL CAPABILITIES</span>
+            </div>
+            <h2 class="section-title-center">Engineered for High-Performance Learning</h2>
+            <p class="section-subtitle-center">Six specialized AI study tools designed to turn dense textbooks into high-scoring exam knowledge.</p>
+
+            <div class="features-grid">
+                <!-- Card 1: Smart Summary -->
+                <div class="feature-glass-card" data-tilt>
+                    <div class="card-glow" aria-hidden="true"></div>
+                    <div class="feature-icon-box">
+                        <span>📝</span>
+                    </div>
+                    <div class="feature-tag">Active Recall</div>
+                    <h3 class="feature-card-title">Smart Summary Engine</h3>
+                    <p class="feature-card-desc">
+                        Condenses 50+ page lecture slides and textbook chapters into key concepts, core formulas, and crucial exam takeaways.
+                    </p>
+                    <a href="#live-app" class="card-action-link" onclick="document.querySelector('.study-tools-bar .tool-btn:nth-child(1)')?.scrollIntoView({behavior:'smooth'})">Try Summary ➔</a>
+                </div>
+
+                <!-- Card 2: MCQ Generator -->
+                <div class="feature-glass-card" data-tilt>
+                    <div class="card-glow" aria-hidden="true"></div>
+                    <div class="feature-icon-box">
+                        <span>🎯</span>
+                    </div>
+                    <div class="feature-tag">Self-Testing</div>
+                    <h3 class="feature-card-title">5 MCQs with Explanations</h3>
+                    <p class="feature-card-desc">
+                        Generates targeted multiple-choice questions with tricky distractors and detailed step-by-step rationales to test mastery.
+                    </p>
+                    <a href="#live-app" class="card-action-link" onclick="document.querySelector('.study-tools-bar .tool-btn:nth-child(2)')?.scrollIntoView({behavior:'smooth'})">Generate Quiz ➔</a>
+                </div>
+
+                <!-- Card 3: Flashcards -->
+                <div class="feature-glass-card" data-tilt>
+                    <div class="card-glow" aria-hidden="true"></div>
+                    <div class="feature-icon-box">
+                        <span>⚡</span>
+                    </div>
+                    <div class="feature-tag">Memory Booster</div>
+                    <h3 class="feature-card-title">5 Active-Recall Flashcards</h3>
+                    <p class="feature-card-desc">
+                        Extracts high-yield concept questions and concise answers formatted for spaced repetition and rapid pre-exam revision.
+                    </p>
+                    <a href="#live-app" class="card-action-link" onclick="document.querySelector('.study-tools-bar .tool-btn:nth-child(3)')?.scrollIntoView({behavior:'smooth'})">View Flashcards ➔</a>
+                </div>
+
+                <!-- Card 4: YouTube to Notes -->
+                <div class="feature-glass-card" data-tilt>
+                    <div class="card-glow" aria-hidden="true"></div>
+                    <div class="feature-icon-box">
+                        <span>▶️</span>
+                    </div>
+                    <div class="feature-tag">Video Intelligence</div>
+                    <h3 class="feature-card-title">YouTube to Lecture Notes</h3>
+                    <p class="feature-card-desc">
+                        Paste any educational YouTube URL to automatically synthesize video transcripts into structured notes and core takeaways.
+                    </p>
+                    <a href="#live-app" class="card-action-link" onclick="document.querySelector('.study-tools-bar .tool-btn:nth-child(4)')?.scrollIntoView({behavior:'smooth'})">Summarize Video ➔</a>
+                </div>
+
+                <!-- Card 5: PDF Notes Export -->
+                <div class="feature-glass-card" data-tilt>
+                    <div class="card-glow" aria-hidden="true"></div>
+                    <div class="feature-icon-box">
+                        <span>📥</span>
+                    </div>
+                    <div class="feature-tag">Offline Study</div>
+                    <h3 class="feature-card-title">Formatted PDF Export</h3>
+                    <p class="feature-card-desc">
+                        Download your customized study notes, summaries, and tutor answers as clean, printable PDF documents in one click.
+                    </p>
+                    <a href="#live-app" class="card-action-link" onclick="document.querySelector('.study-tools-bar .tool-btn:nth-child(5)')?.scrollIntoView({behavior:'smooth'})">Export PDF ➔</a>
+                </div>
+
+                <!-- Card 6: Excel Workbook Export -->
+                <div class="feature-glass-card" data-tilt>
+                    <div class="card-glow" aria-hidden="true"></div>
+                    <div class="feature-icon-box">
+                        <span>📊</span>
+                    </div>
+                    <div class="feature-tag">Spreadsheets</div>
+                    <h3 class="feature-card-title">Excel Sheet Generator</h3>
+                    <p class="feature-card-desc">
+                        Exports study topics, formulas, and flashcard sets directly into organized Microsoft Excel (.xlsx) workbooks for tracking.
+                    </p>
+                    <a href="#live-app" class="card-action-link" onclick="document.querySelector('.study-tools-bar .tool-btn:nth-child(6)')?.scrollIntoView({behavior:'smooth'})">Export Excel ➔</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. How It Works Section -->
+    <section class="how-it-works-section" id="how-it-works">
+        <div class="section-container">
+            <div class="section-badge-center">
+                <span>⚡ 3-STEP PIPELINE</span>
+            </div>
+            <h2 class="section-title-center">How StudyMind AI Works</h2>
+            <p class="section-subtitle-center">From unorganized textbooks to grounded exam mastery in three simple steps.</p>
+
+            <div class="timeline-container">
+                <div class="timeline-track" aria-hidden="true"></div>
+
+                <!-- Step 1 -->
+                <div class="timeline-step">
+                    <div class="step-marker">
+                        <span class="step-num">01</span>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-icon">📤</div>
+                        <h3 class="step-title">Upload Study Materials</h3>
+                        <p class="step-desc">
+                            Upload your course PDF, TXT, or Excel files up to 5 MB. Apache PDFBox extracts physical pages and partitions text into overlapping 500-word sliding windows.
+                        </p>
+                        <div class="step-tag">Apache PDFBox 3.x • Pure Java Chunking</div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="timeline-step">
+                    <div class="step-marker">
+                        <span class="step-num">02</span>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-icon">🔍</div>
+                        <h3 class="step-title">Ask Doubts & Search Notes</h3>
+                        <p class="step-desc">
+                            Type questions in natural language. In-memory TF-IDF calculates semantic keyword similarity to surface top passages with zero hallucinations.
+                        </p>
+                        <div class="step-tag">TF-IDF Vector Matching • Anti-Hallucination</div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="timeline-step">
+                    <div class="step-marker">
+                        <span class="step-num">03</span>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-icon">🎓</div>
+                        <h3 class="step-title">Learn, Test & Export</h3>
+                        <p class="step-desc">
+                            Review explanations with page citations [Page X]. Generate instant MCQs or flashcards, and export your customized notes to PDF or Excel.
+                        </p>
+                        <div class="step-tag">Page-Level Citations • PDF / XLSX Export</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Live App Section (Preserving all existing IDs and elements) -->
+    <section class="live-app-section" id="live-app">
+        <div class="section-badge-center">
+            <span class="pulse-dot"></span>
+            <span>LIVE INTERACTIVE WORKSPACE</span>
+        </div>
+        <h2 class="section-title-center">Your Dedicated Study Workspace</h2>
+        <p class="section-subtitle-center">Upload documents, chat with your AI mentor, test yourself with active recall, or export revision notes.</p>
+        
+        <div class="app-wrapper">
+        <!-- Backdrop for mobile drawer -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebarDrawer()" aria-hidden="true"></div>
+
         <!-- Sidebar: Study Sessions & File Upload -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="appSidebar">
             <div class="sidebar-header">
                 <button class="new-chat-btn" onclick="startNewChat()">
                     <span>✦</span>
@@ -40,6 +321,9 @@
         <main class="main-stage">
             <header class="app-header">
                 <div class="brand-section">
+                    <button class="mobile-sidebar-toggle-btn" id="mobileSidebarToggle" onclick="toggleSidebarDrawer()" title="Toggle Study Sessions" aria-label="Toggle Study Sessions">
+                        <span>☰ Sessions</span>
+                    </button>
                     <div class="logo-badge">✦</div>
                     <div>
                         <div class="brand-title" th:text="${appName}">StudyMind AI</div>
@@ -119,6 +403,54 @@
             </footer>
         </main>
     </div>
+    </section>
+
+    <!-- 6. Footer Section -->
+    <footer class="app-landing-footer">
+        <div class="footer-container">
+            <div class="footer-brand-col">
+                <div class="footer-brand">
+                    <span class="nav-logo-badge">✦</span>
+                    <span class="nav-brand-text">StudyMind <span class="nav-ai-chip">AI</span></span>
+                </div>
+                <p class="footer-desc">
+                    Java-powered, context-grounded academic mentor for students and universities. Engineered with Java 21, Spring Boot, and Google Gemini API.
+                </p>
+                <div class="footer-tech-badge">
+                    <span>Built with Java 21 + Spring Boot + Google Gemini</span>
+                </div>
+            </div>
+            <div class="footer-links-col">
+                <h4 class="footer-heading">Navigation</h4>
+                <a href="#hero" class="footer-link">Home</a>
+                <a href="#features" class="footer-link">Features</a>
+                <a href="#how-it-works" class="footer-link">How it Works</a>
+                <a href="#live-app" class="footer-link">Live Workspace</a>
+            </div>
+            <div class="footer-links-col">
+                <h4 class="footer-heading">Capabilities</h4>
+                <a href="#live-app" class="footer-link">Smart Summary</a>
+                <a href="#live-app" class="footer-link">5 MCQs Generator</a>
+                <a href="#live-app" class="footer-link">Flashcards</a>
+                <a href="#live-app" class="footer-link">YouTube to Notes</a>
+                <a href="#live-app" class="footer-link">PDF & Excel Export</a>
+            </div>
+            <div class="footer-links-col">
+                <h4 class="footer-heading">Project Links</h4>
+                <a href="https://github.com/mrvivek542/navvv-ai_chatbot_studyHelper" target="_blank" rel="noopener" class="footer-link">GitHub Repository</a>
+                <a href="http://localhost:8080/h2-console" target="_blank" rel="noopener" class="footer-link">Database Console</a>
+                <a href="#hero" class="footer-link">B.Tech AIML Project</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                © 2026 StudyMind AI. Open-source educational project. All rights reserved.
+            </div>
+            <div class="footer-tagline">
+                Powered by Java 21 LTS & Google Gemini 3.5 Flash
+            </div>
+        </div>
+    </footer>
 
     <!-- Script handling DB History & Multi-turn Interactions -->
     <script>
@@ -155,6 +487,10 @@
             if (icon) {
                 icon.innerText = theme === 'dark' ? '☀️' : '🌙';
             }
+            const navIcon = document.getElementById('navThemeIcon');
+            if (navIcon) {
+                navIcon.innerText = theme === 'dark' ? '☀️' : '🌙';
+            }
         }
 
         async function checkCurrentDoc() {
@@ -180,7 +516,7 @@
             if (!file) return;
 
             if (file.size > 5 * 1024 * 1024) {
-                alert('File size exceeds the 5 MB limit. Please select a smaller file.');
+                showToast('File size exceeds 5 MB limit. Please select a smaller file.', 'error');
                 event.target.value = '';
                 return;
             }
@@ -189,6 +525,7 @@
             formData.append('file', file);
 
             appendMessage('ai', `⏳ Uploading and extracting text from "${file.name}"... Please wait.`);
+            showToast(`Uploading and extracting "${file.name}"...`, 'info');
 
             try {
                 const res = await fetch('/api/documents/upload', {
@@ -199,12 +536,15 @@
 
                 if (data.success) {
                     appendMessage('ai', `✅ "${data.fileName}" loaded successfully! (${data.totalPages} pages, ${data.totalWords} words). You can now ask questions based on this file.`);
+                    showToast(`"${data.fileName}" loaded successfully!`, 'success');
                     checkCurrentDoc();
                 } else {
                     appendMessage('ai', `❌ Upload failed: ${data.message}`);
+                    showToast(data.message || 'Upload failed', 'error');
                 }
             } catch (err) {
                 appendMessage('ai', '❌ Network error during file upload.');
+                showToast('Network error during file upload', 'error');
             } finally {
                 event.target.value = '';
             }
@@ -216,8 +556,9 @@
                 await fetch('/api/documents/clear', { method: 'DELETE' });
                 checkCurrentDoc();
                 appendMessage('ai', 'Study document removed. Resuming standard AI tutor mode.');
+                showToast('Active document removed', 'info');
             } catch (err) {
-                alert('Failed to clear document.');
+                showToast('Failed to clear document', 'error');
             }
         }
 
@@ -306,17 +647,21 @@
                     a.click();
                     a.remove();
                     appendMessage('ai', '✅ Notes PDF downloaded successfully!');
+                    showToast('Notes PDF downloaded successfully!', 'success');
                 } else {
                     appendMessage('ai', '❌ Failed to generate PDF file.');
+                    showToast('Failed to generate PDF file', 'error');
                 }
             } catch (e) {
                 appendMessage('ai', '❌ Error downloading PDF.');
+                showToast('Error downloading PDF', 'error');
             }
         }
 
         async function exportCurrentChatAsExcel() {
             const content = getAllChatText();
             appendMessage('ai', '⏳ Preparing your study revision Excel sheet (.xlsx)...');
+            showToast('Preparing Excel workbook...', 'info');
 
             try {
                 const res = await fetch('/api/modern/export/excel', {
@@ -338,11 +683,14 @@
                     a.click();
                     a.remove();
                     appendMessage('ai', '✅ Study revision Excel sheet downloaded successfully!');
+                    showToast('Study revision Excel sheet downloaded!', 'success');
                 } else {
                     appendMessage('ai', '❌ Failed to generate Excel workbook.');
+                    showToast('Failed to generate Excel workbook', 'error');
                 }
             } catch (e) {
                 appendMessage('ai', '❌ Error downloading Excel sheet.');
+                showToast('Error downloading Excel sheet', 'error');
             }
         }
 
@@ -351,6 +699,15 @@
                 const res = await fetch('/api/chat/conversations');
                 const list = await res.json();
                 historyList.innerHTML = '';
+
+                if (!list || list.length === 0) {
+                    historyList.innerHTML = `
+                        <div class="empty-sessions">
+                            <span class="empty-icon">💭</span>
+                            <p class="empty-text">No sessions yet.<br>Start chatting to save history!</p>
+                        </div>`;
+                    return;
+                }
 
                 list.forEach(item => {
                     const el = document.createElement('div');
@@ -505,6 +862,84 @@
                 messageInput.focus();
             }
         }
+
+        /* Toast Notification System */
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast-item toast-${type}`;
+            const iconMap = { 'success': '✓', 'error': '✕', 'info': '✦' };
+            toast.innerHTML = `<span class="toast-icon">${iconMap[type] || '✦'}</span><span class="toast-msg">${message}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.add('toast-show');
+            });
+            setTimeout(() => {
+                toast.classList.remove('toast-show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3800);
+        }
+
+        /* Mobile Sidebar Drawer Toggle */
+        function toggleSidebarDrawer() {
+            const sidebar = document.getElementById('appSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.toggle('active');
+            if (backdrop) backdrop.classList.toggle('active');
+        }
+
+        /* 3D Card Hover Tilt */
+        function initTiltEffects() {
+            document.querySelectorAll('[data-tilt]').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    const rotX = -(y / rect.height) * 9;
+                    const rotY = (x / rect.width) * 9;
+                    card.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-8px)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = '';
+                });
+            });
+        }
+
+        /* Scroll-Triggered Fade-Up Observer */
+        function initScrollAnimations() {
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('revealed');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.feature-glass-card, .timeline-step, .hero-content, .hero-preview-wrapper, .section-title-center').forEach(el => {
+                    el.classList.add('reveal-node');
+                    observer.observe(el);
+                });
+            }
+        }
+
+        /* Initialize Animations & Listeners on Load */
+        document.addEventListener('DOMContentLoaded', () => {
+            initTiltEffects();
+            initScrollAnimations();
+
+            // Keyboard shortcut: Enter to send, Shift+Enter for new line
+            if (messageInput) {
+                messageInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        submitChat();
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
